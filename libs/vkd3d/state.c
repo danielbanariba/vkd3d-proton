@@ -1189,6 +1189,9 @@ static HRESULT d3d12_root_signature_init_root_descriptors(struct d3d12_root_sign
 
         if (heap)
         {
+            if (p->ParameterType != D3D12_ROOT_PARAMETER_TYPE_CBV)
+                binding->flags |= VKD3D_SHADER_BINDING_FLAG_RAW_SSBO;
+
             vkd3d_array_reserve((void **)&root_signature->heap.mappings, &root_signature->heap.mappings_size,
                     root_signature->heap.mappings_count + 1,
                     sizeof(*root_signature->heap.mappings));
@@ -2103,6 +2106,8 @@ unsigned int d3d12_root_signature_get_shader_interface_flags(const struct d3d12_
         flags |= VKD3D_SHADER_INTERFACE_BINDLESS_CBV_AS_STORAGE_BUFFER;
     if (d3d12_device_use_embedded_mutable_descriptors(root_signature->device))
         flags |= VKD3D_SHADER_INTERFACE_RAW_VA_ALIAS_DESCRIPTOR_BUFFER;
+    if (d3d12_device_use_descriptor_heap(root_signature->device))
+        flags |= VKD3D_SHADER_INTERFACE_HEAP_LOWERING;
 
     return flags;
 }
